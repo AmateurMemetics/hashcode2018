@@ -14,6 +14,33 @@ def distance_between(start, finish):
     return abs(start_x - finish_x) + abs(start_y - finish_x)
 
 
+def ind2route(individual, rides):
+    route = [[] for _ in range(MAX_VEHICLES)]
+    i = 0
+    for vehicle in range(MAX_VEHICLES):
+        vehicle_time = 0
+        vehicle_location = 0, 0
+        while True:
+            ride = rides[individual[i]]
+            # go to start pos
+            vehicle_time += distance_between(vehicle_location, ride.start_pos)
+            vehicle_location = ride.start_pos
+            if vehicle_time <= ride.start_time:
+                vehicle_time = ride.start_time
+
+            # go to end pos
+            vehicle_time += distance_between(vehicle_location, ride.end_pos)
+            vehicle_location = ride.end_pos
+            if vehicle_time <= TIME_LIMIT:
+                route[vehicle].append(individual[i])
+                i += 1
+                if i == len(individual):
+                    break
+            else:
+                break
+    return route
+
+
 def evalVRPTW(individual, rides):
     """Fitness function ayy"""
     total_score = 0
