@@ -11,40 +11,44 @@ MAX_Y, MAX_X, MAX_VEHICLES, MAX_RIDES, BONUS, TIME_LIMIT = (None for i in range(
 def distance_between(start, finish):
     start_x, start_y = start
     finish_x, finish_y = finish
-    return abs(start_x - finish_x) + abs(start_y - finish_x)
+    return abs(start_x - finish_x) + abs(start_y - finish_y)
 
 
 def ind2route(individual, rides):
     route = [[] for _ in range(MAX_VEHICLES)]
-    i = 0
-    for vehicle in range(MAX_VEHICLES):
-        vehicle_time = 0
-        vehicle_location = 0, 0
-        try:
-            while True:
-                ride = rides[individual[i]]
-                # go to start pos
-                vehicle_time += distance_between(vehicle_location, ride.start_pos)
-                vehicle_location = ride.start_pos
-                if vehicle_time <= ride.start_time:
-                    vehicle_time = ride.start_time
-
-                # go to end pos
-                vehicle_time += distance_between(vehicle_location, ride.end_pos)
-                vehicle_location = ride.end_pos
-                if vehicle_time <= TIME_LIMIT:
-                    route[vehicle].append(individual[i])
-                    i += 1
-                else:
-                    break
-                if i == len(individual):
-                    break
-            if i == len(individual):
-                break
-        except Exception:
-            print("".join(str(i) for i in individual))
-            print(" " * i + "^")
-            raise
+    vehicle = 0
+    for i in individual:
+        route[vehicle].append(i)
+        vehicle += 1
+        vehicle %= MAX_VEHICLES
+    # for vehicle in range(MAX_VEHICLES):
+    #     vehicle_time = 0
+    #     vehicle_location = 0, 0
+    #     try:
+    #         while True:
+    #             ride = rides[individual[i]]
+    #             # go to start pos
+    #             vehicle_time += distance_between(vehicle_location, ride.start_pos)
+    #             vehicle_location = ride.start_pos
+    #             if vehicle_time <= ride.start_time:
+    #                 vehicle_time = ride.start_time
+    #
+    #             # go to end pos
+    #             vehicle_time += distance_between(vehicle_location, ride.end_pos)
+    #             vehicle_location = ride.end_pos
+    #             if vehicle_time <= TIME_LIMIT:
+    #                 route[vehicle].append(individual[i])
+    #                 i += 1
+    #             else:
+    #                 break
+    #             if i == len(individual):
+    #                 break
+    #         if i == len(individual):
+    #             break
+    #     except Exception:
+    #         print("".join(str(i) for i in individual))
+    #         print(" " * i + "^")
+    #         raise
     return route
 
 
@@ -139,10 +143,11 @@ def gaVRPTW(rides, indSize, popSize, cxPb, mutPb, nGen):
                 del mutant.fitness.values
         # evaluate individuals with an invalid fitness
         invalidInd = [ind for ind in offspring if not ind.fitness.valid]
-        fitnesses = map(toolbox.evaluate, invalidInd)
+        fitnesses = list(map(toolbox.evaluate, invalidInd))
         for ind, fit in zip(invalidInd, fitnesses):
             ind.fitness.values = fit
         pop[:] = offspring
+        print(max(fitnesses[0]))
     bestInd = tools.selBest(pop, 1)[0]
     return ind2route(bestInd, rides)
 
@@ -199,7 +204,7 @@ def main():
 
 
 def solve(rides):
-    solution = gaVRPTW(rides, indSize=len(rides), popSize=100, cxPb=0.85, mutPb=0.06, nGen=100)
+    solution = gaVRPTW(rides, indSize=len(rides), popSize=10, cxPb=0.85, mutPb=0.06, nGen=10)
     return vrptw_solution_to_output(solution)
 
 
