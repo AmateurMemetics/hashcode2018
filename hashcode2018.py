@@ -44,7 +44,7 @@ def ind2route(individual, rides):
 def evalVRPTW(individual, rides):
     """Fitness function ayy"""
     total_score = 0
-    routes = ind2route(individual)
+    routes = ind2route(individual, rides)
     for vehicle in routes:
         vehicle_score = 0
         vehicle_time = 0
@@ -97,18 +97,18 @@ def mutInverseIndexes(individual):
     return individual,
 
 
-def gaVRPTW(individual, instance, indSize, popSize, cxPb, mutPb, nGen):
+def gaVRPTW(rides, indSize, popSize, cxPb, mutPb, nGen):
     creator.create('FitnessMax', base.Fitness, weights=(1.0,))
     creator.create('Individual', list, fitness=creator.FitnessMax)
     toolbox = base.Toolbox()
 
     # attribute generator
-    toolbox.register('indexes', random.sample, range(1, indSize + 1), indSize)
+    toolbox.register('indexes', random.sample, range(indSize), indSize)
     # structure initializers
     toolbox.register('individual', tools.initIterate, creator.Individual, toolbox.indexes)
     toolbox.register('population', tools.initRepeat, list, toolbox.individual)
     # operator registering
-    toolbox.register('evaluate', evalVRPTW, instance=instance)
+    toolbox.register('evaluate', evalVRPTW, rides=rides)
     toolbox.register('select', tools.selRoulette)
     toolbox.register('mate', cxPartiallyMatched)
     toolbox.register('mutate', mutInverseIndexes)
@@ -136,8 +136,8 @@ def gaVRPTW(individual, instance, indSize, popSize, cxPb, mutPb, nGen):
         for ind, fit in zip(invalidInd, fitnesses):
             ind.fitness.values = fit
         pop[:] = offspring
-        bestInd = tools.selBest(pop, 1)[0]
-        ind2route(bestInd, instance)
+    bestInd = tools.selBest(pop, 1)[0]
+    return ind2route(bestInd, rides)
 
 
 class Ride(types.SimpleNamespace):
@@ -192,15 +192,8 @@ def main():
 
 
 def solve(rides):
-    s = Solution()
-    rides.sort(key=lambda r: r.start_time)
-    vehicle_number = 0
-    for ride in rides:
-        s.assign(vehicle_number, ride_number=ride.ride_number)
-        vehicle_number += 1
-        vehicle_number %= MAX_VEHICLES
-
-    return str(s)
+    solution = gaVRPTW(rides, indSize=len(rides), popSize=100, cxPb=0.85, mutPb=0.02, nGen=300)
+    return vrptw_solution_to_output(solution)
 
 
 def vrptw_solution_to_output(solution):
