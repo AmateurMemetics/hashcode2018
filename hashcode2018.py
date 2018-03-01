@@ -70,5 +70,15 @@ def solve(rides):
     return str(s)
 
 
+def vrptw_solution_to_output(solution):
+    assert len(solution) == MAX_VEHICLES
+    output = ""
+    for rides in solution:
+        output += str(len(rides)) + " "
+        output += " ".join(str(r) for r in rides)
+        output += "\n"
+    return output
+
+
 if __name__ == "__main__":
     main()
