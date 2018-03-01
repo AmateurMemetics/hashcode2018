@@ -7,11 +7,46 @@ from deap import base, creator, tools
 
 MAX_Y, MAX_X, MAX_VEHICLES, MAX_RIDES, BONUS, TIME_LIMIT = (None for i in range(6))
 
-def evalVRPTW(individual, instance, bonus=0):
+
+def distance_between(start, finish):
+    start_x, start_y = start
+    finish_x, finish_y = finish
+    return abs(start_x - finish_x) + abs(start_y - finish_x)
+
+
+def evalVRPTW(individual, rides):
     """Fitness function ayy"""
-    totalCost = 0
-    route = ind2route(individual, instance)
-    
+    total_score = 0
+    routes = ind2route(individual)
+    for vehicle in routes:
+        vehicle_score = 0
+        vehicle_time = 0
+        vehicle_location = 0, 0
+        for ride_number in vehicle:
+            ride = rides[ride_number]
+            # go to start pos
+            vehicle_time += distance_between(vehicle_location, ride.start_pos)
+            vehicle_location = ride.start_pos
+
+            # wait for ride to start
+            if vehicle_time <= ride.start_time:
+                # Additionally, each ride which started exactly in its earliest
+                # allowed start step gets an additional timeliness bonus of B.
+                vehicle_time = ride.start_time
+                vehicle_score += BONUS
+
+            # go to end pos
+            vehicle_time += distance_between(vehicle_location, ride.end_pos)
+            vehicle_location = ride.end_pos
+            if vehicle_time < ride.end_time:
+                # Each ride completed before its latest finish earns the number
+                # of points equal to the distance between the start intersection
+                # and the finish intersection.
+                vehicle_score += distance_between(ride.start_pos, ride.end_pos)
+
+        total_score += vehicle_score
+    return total_score
+
 
 def gaVRPTW(individual, instance, indSize, popSize):
     creator.create('FitnessMax', base.Fitness, weights=(1.0,))
