@@ -2,9 +2,30 @@
 """Wet Bandits back at it again!"""
 import sys
 import types
+import random
+from deap import base, creator, tools
 
 MAX_Y, MAX_X, MAX_VEHICLES, MAX_RIDES, BONUS, TIME_LIMIT = (None for i in range(6))
 
+def evalVRPTW(individual, instance, bonus=0):
+    """Fitness function ayy"""
+    totalCost = 0
+    route = ind2route(individual, instance)
+    
+
+def gaVRPTW(individual, instance, indSize, popSize):
+    creator.create('FitnessMax', base.Fitness, weights=(1.0,))
+    creator.create('Individual', list, fitness=creator.FitnessMax)
+    toolbox = base.Toolbox()
+
+    # attribute generator
+    toolbox.register('indexes', random.sample, range(1, indSize + 1), indSize)
+    # structure initializers
+    toolbox.register('individual', tools.initIterate, creator.Individual, toolbox.indexes)
+    toolbox.register('population', tools.initRepeat, list, toolbox.individual)
+    # operator registering
+    toolbox.register('evaluate', evalVRPTW, instance=instance, )
+    
 
 class Ride(types.SimpleNamespace):
     def __init__(self, ride_number, start_x, start_y, end_x, end_y, start_time,
