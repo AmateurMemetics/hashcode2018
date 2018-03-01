@@ -60,7 +60,8 @@ def main():
 def solve(rides):
     s = Solution()
 
-    # todo: solve
+    for ride in rides:
+        s.assign(0, ride_number=ride.ride_number)
 
     return str(s)
 
