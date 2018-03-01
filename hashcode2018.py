@@ -70,7 +70,7 @@ def main():
 
     print("Solving " + sys.argv[1])
     print("Assigning {} vehicles to {} rides in {} time steps"
-          .format(MAX_VEHICLES,MAX_RIDES, TIME_LIMIT))
+          .format(MAX_VEHICLES, MAX_RIDES, TIME_LIMIT))
     print("Size ({}, {}), with a bonus of {}".format(MAX_X, MAX_Y, BONUS))
 
     output = solve(rides)
@@ -80,10 +80,25 @@ def main():
 
 def solve(rides):
     s = Solution()
+    rides.sort(key=lambda r: r.start_time)
 
-    # todo: solve
+    vehicle_number = 0
+    for ride in rides:
+        s.assign(vehicle_number, ride_number=ride.ride_number)
+        vehicle_number += 1
+        vehicle_number %= MAX_VEHICLES
 
     return str(s)
+
+
+def vrptw_solution_to_output(solution):
+    assert len(solution) == MAX_VEHICLES
+    output = ""
+    for rides in solution:
+        output += str(len(rides)) + " "
+        output += " ".join(str(r) for r in rides)
+        output += "\n"
+    return output
 
 
 if __name__ == "__main__":
