@@ -20,24 +20,31 @@ def ind2route(individual, rides):
     for vehicle in range(MAX_VEHICLES):
         vehicle_time = 0
         vehicle_location = 0, 0
-        while True:
-            ride = rides[individual[i]]
-            # go to start pos
-            vehicle_time += distance_between(vehicle_location, ride.start_pos)
-            vehicle_location = ride.start_pos
-            if vehicle_time <= ride.start_time:
-                vehicle_time = ride.start_time
+        try:
+            while True:
+                ride = rides[individual[i]]
+                # go to start pos
+                vehicle_time += distance_between(vehicle_location, ride.start_pos)
+                vehicle_location = ride.start_pos
+                if vehicle_time <= ride.start_time:
+                    vehicle_time = ride.start_time
 
-            # go to end pos
-            vehicle_time += distance_between(vehicle_location, ride.end_pos)
-            vehicle_location = ride.end_pos
-            if vehicle_time <= TIME_LIMIT:
-                route[vehicle].append(individual[i])
-                i += 1
+                # go to end pos
+                vehicle_time += distance_between(vehicle_location, ride.end_pos)
+                vehicle_location = ride.end_pos
+                if vehicle_time <= TIME_LIMIT:
+                    route[vehicle].append(individual[i])
+                    i += 1
+                else:
+                    break
                 if i == len(individual):
                     break
-            else:
+            if i == len(individual):
                 break
+        except Exception:
+            print("".join(str(i) for i in individual))
+            print(" " * i + "^")
+            raise
     return route
 
 
@@ -72,7 +79,7 @@ def evalVRPTW(individual, rides):
                 vehicle_score += distance_between(ride.start_pos, ride.end_pos)
 
         total_score += vehicle_score
-    return total_score
+    return total_score,
 
 
 def cxPartiallyMatched(ind1, ind2):
@@ -192,7 +199,7 @@ def main():
 
 
 def solve(rides):
-    solution = gaVRPTW(rides, indSize=len(rides), popSize=100, cxPb=0.85, mutPb=0.02, nGen=300)
+    solution = gaVRPTW(rides, indSize=len(rides), popSize=100, cxPb=0.85, mutPb=0.06, nGen=100)
     return vrptw_solution_to_output(solution)
 
 
