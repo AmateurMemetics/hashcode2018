@@ -49,7 +49,7 @@ def main():
 
     print("Solving " + sys.argv[1])
     print("Assigning {} vehicles to {} rides in {} time steps"
-          .format(MAX_VEHICLES,MAX_RIDES, TIME_LIMIT))
+          .format(MAX_VEHICLES, MAX_RIDES, TIME_LIMIT))
     print("Size ({}, {}), with a bonus of {}".format(MAX_X, MAX_Y, BONUS))
 
     output = solve(rides)
@@ -59,9 +59,13 @@ def main():
 
 def solve(rides):
     s = Solution()
+    rides.sort(key=lambda r: r.start_time)
 
+    vehicle_number = 0
     for ride in rides:
-        s.assign(0, ride_number=ride.ride_number)
+        s.assign(vehicle_number, ride_number=ride.ride_number)
+        vehicle_number += 1
+        vehicle_number %= MAX_VEHICLES
 
     return str(s)
 
